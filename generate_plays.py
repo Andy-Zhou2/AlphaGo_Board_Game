@@ -14,8 +14,7 @@ class GameGenerator:
         tree = Tree(self.net)
         while not tree.root.s.is_game_end():
             tree.search_from_root()
-            moves.append(tree.root.get_best_edge())
-            tree.next_round()
+            moves.append(tree.next_round())  # next_round returns best_a
         with open(os.path.join(self.save_path, str(game_id)), 'wb') as f:
             pickle.dump(moves, f)
 

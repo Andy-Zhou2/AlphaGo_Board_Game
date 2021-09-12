@@ -11,14 +11,14 @@ class Node:
         self.edges = dict()  # a -> Edge
         p, v = net(s)
         self.v = v
-        valid_actions = get_valid_actions(s)
-        next_probabilities = normalize_actions_probability(p, valid_actions)
-        for a in valid_actions:
+        self.valid_actions = get_valid_actions(s)
+        next_probabilities = normalize_actions_probability(p, self.valid_actions)
+        for a in self.valid_actions:
             self.edges[a] = Edge(next_probabilities[a])
 
-    def get_best_edge(self):
+    def get_best_U_edge(self):
         max_u, best_a, best_edge = -float("inf"), [], Edge(0)
-        for a in get_valid_actions(self.s):
+        for a in self.valid_actions:
             edge = self.edges[a]
             N = self.N
             u = edge.Q + c_puct * edge.P * N / (1 + edge.N)
@@ -27,6 +27,17 @@ class Node:
                 best_a = a
                 best_edge = edge
         return max_u, best_a, best_edge
+
+    def get_best_N_edge(self):
+        max_N, best_a, best_edge = -float("inf"), [], Edge(0)
+        for a in self.valid_actions:
+            edge = self.edges[a]
+            N = self.N
+            if N > max_N:
+                max_N = N
+                best_a = a
+                best_edge = edge
+        return max_N, best_a, best_edge
 
 
 class Edge:
@@ -53,10 +64,10 @@ def search(net, current_node):
     if s.is_game_end():
         return reward(s)
 
-    max_u, best_a, best_edge = current_node.get_best_edge()
+    max_u, best_a, best_edge = current_node.get_best_U_edge()
 
     if not best_edge.expanded:
-        best_edge.expand(s.reverse(), net)  # 儿子节点的s应该是以白方视角的，因此reverse
+        best_edge.expand(next_state(s, best_a).reverse(), net)  # 儿子节点的s应该是以白方视角的，因此reverse
         v = best_edge.son.v
     else:
         v = search(net, best_edge.son)
@@ -85,6 +96,11 @@ class Tree:
         但是可能还是手动删掉比较好
         :return:
         """
-        last_root = self.root
-        self.root = self.root.get_best_edge().son
-        
+        # note: 最终选择的不是U最大的边，而是走过次数最多的边
+        root_backup = self.root
+        max_N, best_a, best_edge = self.root.get_best_N_edge()
+        self.root = best_edge.son
+        del root_backup
+        return best_a
+
+

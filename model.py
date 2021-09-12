@@ -1,5 +1,6 @@
 import torch as t
 import torch.nn as nn
+from board_tik_tak_toe import Board
 
 
 class ConvBlk(nn.Module):
@@ -44,7 +45,7 @@ class PolicyHead(nn.Module):
         self.conv = nn.Conv2d(256, 2, kernel_size=1)
         self.bn = nn.BatchNorm2d(2)
         self.relu = nn.LeakyReLU(inplace=True)
-        self.fc = nn.Linear(2*15*15, 15*15)
+        self.fc = nn.Linear(2 * 3 * 3, 3 * 3)  # for GoBang change 3 to 15
 
     def forward(self, x):
         x = self.conv(x)
@@ -61,7 +62,7 @@ class ValueHead(nn.Module):
         self.conv = nn.Conv2d(256, 1, kernel_size=1)
         self.bn = nn.BatchNorm2d(1)
         self.relu1 = nn.LeakyReLU(inplace=True)
-        self.fc1 = nn.Linear(15*15, 256)
+        self.fc1 = nn.Linear(3 * 3, 256)  # for gobang it should be 15x15
         self.relu2 = nn.LeakyReLU(inplace=True)
         self.fc2 = nn.Linear(256, 1)
 
@@ -106,6 +107,11 @@ class GoBangNet(nn.Module):
         self.value_head = ValueHead()
 
     def forward(self, x):
+        flag = False
+        if isinstance(x, Board):
+            flag = True
+            x = t.Tensor([x.black, x.white])
+            x = x.unsqueeze(0)
         x = self.conv_block(x)
 
         x = self.res_block1(x)
@@ -132,6 +138,10 @@ class GoBangNet(nn.Module):
         policy = self.policy_head(x)
         value = self.value_head(x)
 
+        if flag:
+            policy = policy[0]
+            value = value[0]
+
         return policy, value
 
 
@@ -139,5 +149,4 @@ if __name__ == '__main__':
     model = GoBangNet()
     model.to('cuda')
     for i in range(1000):
-        model(t.rand(1024,2,15,15).to('cuda'))
-
+        model(t.rand(1024, 2, 15, 15).to('cuda'))

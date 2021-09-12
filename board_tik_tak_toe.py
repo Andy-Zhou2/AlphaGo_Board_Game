@@ -13,7 +13,7 @@ def is_win(p):
         if match_3(p[i]):
             return True
     for i in range(3):
-        if match_3(p[:, i].transpose([1, 0])):
+        if match_3(p[:, i]):
             return True
     if match_3((p[0, 0], p[1, 1], p[2, 2])):
         return True
@@ -25,9 +25,10 @@ def is_win(p):
 class Board:
     def __init__(self, board=None):
         if board is None:
-            self.black = np.zeros([15, 15])
-            self.white = np.zeros([15, 15])
-        self.black, self.white = board
+            self.black = np.zeros([3, 3])
+            self.white = np.zeros([3, 3])
+        else:
+            self.black, self.white = board
 
     def is_game_end(self) -> bool:
         return self.is_black_win() or self.is_white_win()
@@ -40,6 +41,17 @@ class Board:
 
     def reverse(self):
         return reverse(self)
+
+    def print_self(self):
+        horizontal_line_length = 13
+        self.str_board = [
+            ['●' if self.black[i][j] else '○' if self.white[i][j] else ' ' for j in range(3)] for i in
+            range(3)]
+        for i in range(3):
+            print('-' * horizontal_line_length)
+            print('| ', end='')
+            print(*self.str_board[i], sep=' | ', end=' |\n')
+        print('-' * horizontal_line_length)
 
 
 def reverse(s: Board):
@@ -114,13 +126,3 @@ def next_state(s: Board, a) -> Board:
     row, col = a
     result.black[row][col] = 1
     return result
-
-
-class Game:
-    def __init__(self):
-        """set up the board"""
-        ...
-
-    def move(self, a):
-        """update the board after action 'a'"""
-        ...

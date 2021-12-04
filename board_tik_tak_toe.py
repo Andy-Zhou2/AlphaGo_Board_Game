@@ -23,12 +23,12 @@ def is_win(p):
 
 
 class Board:
-    def __init__(self, board=None):
-        if board is None:
+    def __init__(self, boards=None):
+        if boards is None:
             self.black = np.zeros([3, 3])
             self.white = np.zeros([3, 3])
         else:
-            self.black, self.white = board
+            self.black, self.white = boards
 
     def is_game_end(self) -> bool:
         return self.is_black_win() or self.is_white_win()
@@ -40,17 +40,18 @@ class Board:
         return is_win(self.white)
 
     def reverse(self):
+        """returns a new board"""
         return reverse(self)
 
     def print_self(self):
         horizontal_line_length = 13
-        self.str_board = [
+        str_board = [
             ['●' if self.black[i][j] else '○' if self.white[i][j] else ' ' for j in range(3)] for i in
             range(3)]
         for i in range(3):
             print('-' * horizontal_line_length)
             print('| ', end='')
-            print(*self.str_board[i], sep=' | ', end=' |\n')
+            print(*str_board[i], sep=' | ', end=' |\n')
         print('-' * horizontal_line_length)
 
 
@@ -68,7 +69,7 @@ def reward(s: Board) -> {-1, 1, 0}:
         return 0
 
 
-def get_all_actions(s: Board) -> list:
+def get_all_actions() -> list:
     result = []
     for row in range(3):
         for col in range(3):
@@ -81,7 +82,7 @@ def get_valid_actions(s: Board) -> list:
     唯一规则：已经有的地方不能再落子
     """
     result = []
-    for a in get_all_actions(s):
+    for a in get_all_actions():
         row, col = a
         if not (s.black[row][col] or s.white[row][col]):
             result.append(a)

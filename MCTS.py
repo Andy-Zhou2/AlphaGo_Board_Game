@@ -106,7 +106,7 @@ class Tree:
         self.root = Node(Board(None), net)  # None -> Empty Board
         self.net = net
 
-    def search_from_root(self, search_time=1600):
+    def search_from_root(self, search_time=15):
         for _ in range(search_time):
             search(self.net, self.root)
             print(self.root.N)

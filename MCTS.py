@@ -3,6 +3,7 @@ from random import randint
 from math import sqrt
 
 c_puct = 1
+DEFAULT_SEARCH_COUNT = 200
 
 
 class Node:
@@ -54,6 +55,29 @@ class Node:
             if prev_N >= rand_num:
                 return a, edge
 
+    def get_pi_distribution(self, tau):
+        """
+        assume that the node is the root of the tree
+        returns probability proportional to N (if tau = 1) or only the target node (if tau = 0)
+        :return:
+        """
+        result = [0] * 15 * 15
+        assert tau == 0 or tau == 1
+        if tau == 1:
+            total_N = 0
+            for i in range(15 * 15):
+                a = index_to_coord(i)
+                if a in self.valid_actions:
+                    edge_N = self.edges[a].N
+                    result[i] = edge_N
+                    total_N += edge_N
+            for i in range(15 * 15):
+                result[i] /= total_N
+        else:  # tau == 0
+            max_N, best_a, best_edge = self.get_best_N_edge()
+            result[coord_to_index(best_a)] = 1
+        return result
+
 
 class Edge:
     def __init__(self, p_a):
@@ -78,9 +102,9 @@ def search(net, current_node):
     # current_node.s.print_board()
     s = current_node.s
     if s.is_game_ended():
-        print("game ended")
-        print(s.print_board())
-        print(s.reward())
+        # print("game ended")
+        # print(s.print_board())
+        # print(s.reward())
         return s.reward()
 
     # otherwise, select best edge and search
@@ -111,42 +135,35 @@ class Tree:
         self.root = Node(GoBangBoard(), net)  # create empty board
         self.net = net
 
-    def search_from_root(self, search_time=1):
+    def search_from_root(self, search_time=DEFAULT_SEARCH_COUNT):
         for _ in range(search_time):
-            # print('searching count: ', self.root.N)
             search(self.net, self.root)
 
-    # def next_round(self, edge):
-    #     """
-    #     deletes the root node and other edges/nodes except the best one
-    #     全靠垃圾回收机制
-    #     :return:
-    #     """
-    #     # note: 最终选择的不是U最大的边，而是走过次数最多的边
-    #     self.root = edge.son
-
-    def select_edge_and_progress(self, tau) -> Edge:
+    def select_edge_and_progress(self, tau) -> list:
         """
         selects edge and changes the root node to the son of best edge
-        does not do searching!
+        does not do searching! assume that already searched
+        returns the pi distribution
         :param tau: temperature coefficient
-        :return: edge
+        :return: pi distribution
         """
         assert tau in (0, 1)
+        pi_distribution = self.root.get_pi_distribution(tau)
         if tau == 0:
             max_N, a, edge = self.root.get_best_N_edge()
             self.root = edge.son
         if tau == 1:
             a, edge = self.root.get_edge_prop_to_N()
             self.root = edge.son
-        return edge
+        return pi_distribution
 
 
 class SelfPlayGame:
     def __init__(self, net):
         """set up the board"""
         self.tree = Tree(net)
-        self.progress = []
+        self.s = []
+        self.pi = []
         self.move_count = 0
 
     def next_round(self):
@@ -158,24 +175,41 @@ class SelfPlayGame:
         """
         self.move_count += 1
         self.tree.search_from_root()
-        self.tree.select_edge_and_progress(1 if self.move_count <= 30 else 0)
-        self.progress.append(self.tree.root.s)
+        self.s.append(self.tree.root.s)
+        # select tree, also saves the distribution
+        self.pi.append(self.tree.select_edge_and_progress(1 if self.move_count <= 30 else 0))
+
         print('move count: ', self.move_count)
-        self.tree.root.s.print_board()
+        # self.tree.root.s.print_board()
 
     def generate_whole_game(self):
+        """
+        generate the whole game, returns a list of data (s, pi, z)
+        :return:
+        """
         while not self.tree.root.s.is_game_ended():
             self.next_round()
-        # TODO 倒推，判断每次的最终胜利者
-        return self.progress
 
+        training_data_single_game = []
+        winner = Player.BLACK if self.move_count % 2 == 1 else Player.WHITE
+        print('winner: ', winner)
+        self.tree.root.s.print_board()
+        for step in range(self.move_count):
+            x = self.s[step]
+            unit_data = [[x.black, x.white, x.turn], self.pi[step], 1 if x.current_player == winner else -1]
+            training_data_single_game.append(unit_data)
+            # print(unit_data[0])
+            # print(unit_data[1])
+            # print(unit_data[2])
+        return training_data_single_game
 
-if __name__ == '__main__':
-    from model import GoBangNet
-
-    net = GoBangNet().cuda()
-    l = []
-    for i in range(100):
-        g = SelfPlayGame(net)
-        l.append(g.generate_whole_game())
-        print(g.tree.root.s.print_board())
+# if __name__ == '__main__':
+#     from model import GoBangNet
+#
+#     net = GoBangNet().cuda()
+#     l = []
+#     # for i in range(100):
+#     g = SelfPlayGame(net)
+#     l.append(g.generate_whole_game())
+#     # print(l)
+#     # print(l[0][1])

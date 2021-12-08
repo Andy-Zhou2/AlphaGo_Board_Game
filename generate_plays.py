@@ -1,5 +1,5 @@
 from MCTS import SelfPlayGame
-from board_tik_tak_toe import *
+from gobang_board import *
 import pickle
 import os
 

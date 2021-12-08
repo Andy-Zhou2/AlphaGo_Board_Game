@@ -1,12 +1,12 @@
 import torch as t
 import torch.nn as nn
-from board_tik_tak_toe import Board
+from gobang_board import GoBangBoard
 
 
 class ConvBlk(nn.Module):
     def __init__(self):
         super(ConvBlk, self).__init__()
-        self.conv = nn.Conv2d(2, 256, kernel_size=3, padding=1)
+        self.conv = nn.Conv2d(3, 256, kernel_size=3, padding=1)
         self.bn = nn.BatchNorm2d(256)
         self.relu = nn.LeakyReLU(inplace=True)
 
@@ -45,7 +45,7 @@ class PolicyHead(nn.Module):
         self.conv = nn.Conv2d(256, 2, kernel_size=1)
         self.bn = nn.BatchNorm2d(2)
         self.relu = nn.LeakyReLU(inplace=True)
-        self.fc = nn.Linear(2 * 3 * 3, 3 * 3)  # for GoBang change 3 to 15
+        self.fc = nn.Linear(2 * 15 * 15, 15 * 15)
 
     def forward(self, x):
         x = self.conv(x)
@@ -53,7 +53,7 @@ class PolicyHead(nn.Module):
         x = self.relu(x)
         x = t.flatten(x, start_dim=1)
         x = self.fc(x)
-        return x
+        return t.softmax(x, dim=1)
 
 
 class ValueHead(nn.Module):
@@ -62,7 +62,7 @@ class ValueHead(nn.Module):
         self.conv = nn.Conv2d(256, 1, kernel_size=1)
         self.bn = nn.BatchNorm2d(1)
         self.relu1 = nn.LeakyReLU(inplace=True)
-        self.fc1 = nn.Linear(3 * 3, 256)  # for gobang it should be 15x15
+        self.fc1 = nn.Linear(15*15, 256)
         self.relu2 = nn.LeakyReLU(inplace=True)
         self.fc2 = nn.Linear(256, 1)
 
@@ -108,10 +108,11 @@ class GoBangNet(nn.Module):
 
     def forward(self, x):
         flag = False
-        if isinstance(x, Board):
+        if isinstance(x, GoBangBoard):
             flag = True
-            x = t.Tensor([x.black, x.white])
+            x = t.Tensor([x.black, x.white, x.turn])
             x = x.unsqueeze(0)
+            x = x.cuda()
         x = self.conv_block(x)
 
         x = self.res_block1(x)
@@ -149,4 +150,4 @@ if __name__ == '__main__':
     model = GoBangNet()
     model.to('cuda')
     for i in range(1000):
-        model(t.rand(1024, 2, 15, 15).to('cuda'))
+        model(t.rand(1024, 3, 15, 15).to('cuda'))

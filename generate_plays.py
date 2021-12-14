@@ -9,6 +9,7 @@ import os
 class GameGenerator:
     def __init__(self, save_path, net=None):
         self.net = GoBangNet().cuda() if net is None else net
+        self.net.eval()
         self.save_path = save_path
 
     def generate_games(self, num_games=2048):

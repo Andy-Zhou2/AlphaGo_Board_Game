@@ -148,6 +148,40 @@ class GoBangNet(nn.Module):
 
 if __name__ == '__main__':
     model = GoBangNet()
+    model.eval()
     model.to('cuda')
-    for i in range(1000):
+    from time import time
+    t1 = time()
+    for i in range(10):
         model(t.rand(1024, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10):
+        model(t.rand(32, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10*32):
+        model(t.rand(32, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10):
+        model(t.rand(16, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10):
+        model(t.rand(8, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10):
+        model(t.rand(2, 3, 15, 15).to('cuda'))
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(10):
+        model(t.rand(1, 3, 15, 15).to('cuda'))
+    print(time() - t1)

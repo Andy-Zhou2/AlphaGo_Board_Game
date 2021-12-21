@@ -67,14 +67,21 @@ def check_win_single_board(board):
     """
     :return: True if there is a win on the board
     """
-    if check_long_connection_horizontal(board, 5):
-        return True
-    if check_long_connection_horizontal(board.T, 5):
-        return True
-    if check_diagonal_connection_up_left_to_down_right(board, 5):
-        return True
-    if check_diagonal_connection_down_left_to_up_right(board, 5):
-        return True
+    n = 5
+    for w in range(15):
+        for h in range(15):
+            if (w in range(15 - n + 1) and board[w][h] != 0 and
+                    len(set(board[i][h] for i in range(w, w + n))) == 1):
+                return True
+            if (h in range(15 - n + 1) and board[w][h] != 0 and
+                    len(set(board[w][j] for j in range(h, h + n))) == 1):
+                return True
+            if (w in range(15 - n + 1) and h in range(15 - n + 1) and board[w][h] != 0 and
+                    len(set(board[w + k][h + k] for k in range(n))) == 1):
+                return True
+            if (w in range(15 - n + 1) and h in range(n - 1, 15) and board[w][h] != 0 and
+                    len(set(board[w + l][h - l] for l in range(n))) == 1):
+                return True
     return False
 
 
@@ -210,7 +217,7 @@ class GoBangBoard:
         valid_actions[self.black == 1] = 0
         valid_actions[self.white == 1] = 0
 
-        print(valid_actions.tolist())
+        # print(valid_actions.tolist())
 
         return valid_actions.reshape([225])
 
@@ -225,7 +232,6 @@ class GoBangBoard:
             return -1 if self.current_player == Player.WHITE else 1
         else:
             return 0
-
 
 # if __name__ == '__main__':
 #     board = GoBangBoard()

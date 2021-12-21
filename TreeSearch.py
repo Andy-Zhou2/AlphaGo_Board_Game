@@ -77,7 +77,7 @@ class TreeSearch:
     def get_pi(self, s, tau):
         board = s.get_str_representation()
         counts = np.array([self.Nsa[(board, a)] if (board, a) in self.Nsa else 0 for a in range(225)])
-        print('counts:', counts)
+        # print('counts:', counts)
         # counts = counts * self.Vs[s]
         if np.max(counts) == 0:
             print('warning! max N is 0!')
@@ -107,9 +107,13 @@ net = GoBangNet().cuda()
 tree = TreeSearch(net)
 while not tree.root.is_game_ended():
     t1 = time.time()
-    tree.search_from_root(10)
+    tree.search_from_root(100)
     pi_distribution, move = tree.get_pi_and_move(0)
     tree.root = tree.root.move(move)
     data.append((tree.root, pi_distribution))
-    tree.root.print_board()
+    # tree.root.print_board()
     print(time.time() - t1)
+
+print(tree.root.get_reward())
+tree.root.print_board()
+print(tree.root.current_player)

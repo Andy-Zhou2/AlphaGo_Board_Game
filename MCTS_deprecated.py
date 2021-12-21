@@ -1,4 +1,4 @@
-from time import time
+import time
 
 from gobang_board import *
 from random import randint
@@ -40,7 +40,7 @@ class Node:
             self.edges[a] = Edge(next_probabilities[a])
 
     def get_next_search_edge(self):
-        t1 = time()
+        # t1 = time.time()
         max_f, best_a, best_edge = -float("inf"), None, None
         for a in self.valid_actions:
             edge = self.edges[a]
@@ -49,7 +49,7 @@ class Node:
                 max_f = u
                 best_a = a
                 best_edge = edge
-        print("get_next_search_edge: ", time() - t1)
+        # print("get_next_search_edge: ", time.time() - t1)
         return max_f, best_a, best_edge
 
     def get_best_N_edge(self):
@@ -203,9 +203,9 @@ class SelfPlayGame:
         :return:
         """
         while not self.tree.root.s.is_game_ended():
-            t1 = time()
+            t1 = time.time()
             self.next_round()
-            print('time: ', time() - t1)
+            print('time: ', time.time() - t1)
 
         training_data_single_game = []
         winner = Player.BLACK if self.move_count % 2 == 1 else Player.WHITE

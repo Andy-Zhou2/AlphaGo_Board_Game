@@ -1,4 +1,4 @@
-from MCTS import SelfPlayGame
+from MCTS_deprecated import SelfPlayGame
 from model import GoBangNet
 import time
 from gobang_board import *

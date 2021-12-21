@@ -108,13 +108,6 @@ class GoBangNet(nn.Module):
         self.value_head = ValueHead()
 
     def forward(self, x):
-
-        flag = False
-        if isinstance(x, GoBangBoard):
-            flag = True
-            x = t.Tensor([x.black, x.white, x.turn])
-            x = x.unsqueeze(0)
-            x = x.cuda()
         x = self.conv_block(x)
 
         x = self.res_block1(x)
@@ -141,11 +134,21 @@ class GoBangNet(nn.Module):
         policy = self.policy_head(x)
         value = self.value_head(x)
 
-        if flag:
-            policy = policy[0]
-            value = value[0]
-
         return policy, value
+
+    def predict(self, x):
+        with t.no_grad():
+            flag = False
+            if isinstance(x, GoBangBoard):
+                flag = True
+                x = t.Tensor([x.black, x.white, x.turn])
+                x = x.unsqueeze(0)
+                x = x.cuda()
+            policy, value = self.forward(x)
+            if flag:
+                policy = policy[0]
+                value = value[0]
+            return policy.cpu(), value.cpu()
 
 
 if __name__ == '__main__':

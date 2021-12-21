@@ -1,3 +1,4 @@
+import time
 from random import randint, choice
 import numpy as np
 from enum import Enum
@@ -91,23 +92,27 @@ def coord_to_index(coord):
     return row * 15 + col
 
 
-def normalize_actions_probability(p, valid_actions) -> dict:
+def normalize_actions_probability(p, valid_actions_mask) -> np.array:
     """
     (assume not already win)
     剔除不合理数据后对合理概率归一化
     note: p是原始概率
-    @ param valid_actions: coordinates, not indices
+    valid actions: a mask of valid actions
     """
-    result = dict()
-    sum_valid_pr = 0
-
-    for a in valid_actions:
-        sum_valid_pr += p[coord_to_index(a)]
-
-    for a in valid_actions:
-        result[a] = p[coord_to_index(a)] / sum_valid_pr
-
-    return result
+    p = p * valid_actions_mask
+    p = p / p.sum()
+    return p
+    #
+    # result = dict()
+    # sum_valid_pr = 0
+    #
+    # for a in valid_actions:
+    #     sum_valid_pr += p[coord_to_index(a)]
+    #
+    # for a in valid_actions:
+    #     result[a] = p[coord_to_index(a)] / sum_valid_pr
+    #
+    # return result
 
 
 class GoBangBoard:
@@ -117,6 +122,7 @@ class GoBangBoard:
             self.white = np.zeros([15, 15])
             self.turn = BLACK_TO_MOVE
             self.current_player = Player.BLACK
+            # self.last_player_passed = False
         else:
             self.black, self.white, self.turn = boards
             if np.all(self.turn == BLACK_TO_MOVE):
@@ -140,17 +146,22 @@ class GoBangBoard:
             print(*str_board[i], sep=' | ', end=' |\n')
         print('-' * horizontal_line_length)
 
-    def move(self, x, y):
+    def move(self, a):
         """
         places a stone on the board
         does not check for wins
-        :param x: x coord of move, from 0 to 14
-        :param y: y coord of move, from 0 to 14
+        a: the move, 0 <= a < 225
         :return: a new board object, turn reversed
         """
-        assert 0 <= x <= 14 and 0 <= y <= 14
+        assert 0 <= a < 225
+        x = a // 15
+        y = a % 15
+        # assert 0 <= x <= 14 and 0 <= y <= 14
 
         if self.black[x][y] == 1 or self.white[x][y] == 1:
+            print('error!')
+            print(x, y)
+            self.print_board()
             raise ValueError("This position is already occupied")
 
         new_board = GoBangBoard(boards=(self.black.copy(), self.white.copy(), self.turn.copy()))
@@ -194,14 +205,16 @@ class GoBangBoard:
         returns a list of valid actions
         :return: a list of valid actions
         """
-        valid_actions = []
-        for i in range(15):
-            for j in range(15):
-                if self.black[i][j] == 0 and self.white[i][j] == 0:
-                    valid_actions.append((i, j))
-        return valid_actions
+        valid_actions = np.ones([15, 15], dtype=bool)
 
-    def reward(self):
+        valid_actions[self.black == 1] = 0
+        valid_actions[self.white == 1] = 0
+
+        print(valid_actions.tolist())
+
+        return valid_actions.reshape([225])
+
+    def get_reward(self):
         """
         returns reward for the current board, black wins then 1, white then -1, otherwise 0
         :return: reward
@@ -214,26 +227,26 @@ class GoBangBoard:
             return 0
 
 
-if __name__ == '__main__':
-    board = GoBangBoard()
-    board = board.move(3, 3)
-    board = board.move(4, 3)
-    board = board.move_count(3, 4)
-    board = board.move_count(4, 4)
-    board = board.move_count(3, 5)
-    board = board.move_count(4, 5)
-    board = board.move_count(3, 6)
-    board = board.move_count(4, 6)
-    board = board.move_count(3, 7)
-
-    board.print_board()
-
-    print(board.is_game_ended())
-
-    for i in range(100):
-        try:
-            board = board.move_count(randint(0, 14), randint(0, 14))
-        except ValueError:
-            pass
-    print(board.is_game_ended())
-    board.print_board()
+# if __name__ == '__main__':
+#     board = GoBangBoard()
+#     board = board.move(3, 3)
+#     board = board.move(4, 3)
+#     board = board.move_count(3, 4)
+#     board = board.move_count(4, 4)
+#     board = board.move_count(3, 5)
+#     board = board.move_count(4, 5)
+#     board = board.move_count(3, 6)
+#     board = board.move_count(4, 6)
+#     board = board.move_count(3, 7)
+#
+#     board.print_board()
+#
+#     print(board.is_game_ended())
+#
+#     for i in range(100):
+#         try:
+#             board = board.move_count(randint(0, 14), randint(0, 14))
+#         except ValueError:
+#             pass
+#     print(board.is_game_ended())
+#     board.print_board()

@@ -1,6 +1,7 @@
 import torch as t
 import torch.nn as nn
 from gobang_board import GoBangBoard
+from time import time
 
 
 class ConvBlk(nn.Module):
@@ -107,6 +108,7 @@ class GoBangNet(nn.Module):
         self.value_head = ValueHead()
 
     def forward(self, x):
+
         flag = False
         if isinstance(x, GoBangBoard):
             flag = True
@@ -151,37 +153,67 @@ if __name__ == '__main__':
     model.eval()
     model.to('cuda')
     from time import time
+    # t1 = time()
+    # for i in range(10):
+    #     model(t.rand(1024, 3, 15, 15).to('cuda'))
+    # print(time() - t1)
+
+    a = t.rand(512, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(1024, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(1024, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(32, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(1024, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10*32):
-        model(t.rand(32, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(1024, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(16, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(32, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(8, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(16, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(2, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
     print(time() - t1)
 
+    a = t.rand(8, 3, 15, 15).to('cuda')
     t1 = time()
-    for i in range(10):
-        model(t.rand(1, 3, 15, 15).to('cuda'))
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(4, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(2, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(1, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
     print(time() - t1)

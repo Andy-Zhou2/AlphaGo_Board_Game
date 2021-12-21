@@ -1,3 +1,5 @@
+from time import time
+
 from gobang_board import *
 from random import randint
 from math import sqrt
@@ -188,7 +190,9 @@ class SelfPlayGame:
         :return:
         """
         while not self.tree.root.s.is_game_ended():
+            t1 = time()
             self.next_round()
+            print('time: ', time() - t1)
 
         training_data_single_game = []
         winner = Player.BLACK if self.move_count % 2 == 1 else Player.WHITE
@@ -198,9 +202,7 @@ class SelfPlayGame:
             x = self.s[step]
             unit_data = [[x.black, x.white, x.turn], self.pi[step], 1 if x.current_player == winner else -1]
             training_data_single_game.append(unit_data)
-            # print(unit_data[0])
-            # print(unit_data[1])
-            # print(unit_data[2])
+
         return training_data_single_game
 
 # if __name__ == '__main__':

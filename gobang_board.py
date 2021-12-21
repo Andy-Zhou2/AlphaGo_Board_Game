@@ -124,6 +124,12 @@ class GoBangBoard:
             else:
                 self.current_player = Player.WHITE
 
+    def get_str_representation(self):
+        """
+        :return: string representation of the board
+        """
+        return np.concatenate([self.black, self.white, self.turn]).tostring()
+
     def print_board(self):
         horizontal_line_length = 61
         str_board = [['●' if self.black[i][j] else '○' if self.white[i][j] else ' ' for j in range(15)]

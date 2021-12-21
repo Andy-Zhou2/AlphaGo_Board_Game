@@ -7,6 +7,20 @@ from math import sqrt
 c_puct = 1
 DEFAULT_SEARCH_COUNT = 200
 
+Es = dict()  # stores if game is over
+Vs = dict()  # stores valid actions for s
+
+
+def get_game_ended(s):
+    if s.get_str_representation() in Es:
+        return Es[s.get_str_representation()]
+    else:
+        result = s.is_game_ended()
+        Es[s.get_str_representation()] = result
+        return result
+
+
+
 
 class Node:
     def __init__(self, s: GoBangBoard, net):
@@ -14,7 +28,7 @@ class Node:
         self.N = 0
         self.s = s
         self.edges = dict()  # a -> Edge
-        if s.is_game_ended():
+        if get_game_ended(s):
             self.v = s.reward()
             self.valid_actions = []
             return
@@ -26,6 +40,7 @@ class Node:
             self.edges[a] = Edge(next_probabilities[a])
 
     def get_next_search_edge(self):
+        t1 = time()
         max_f, best_a, best_edge = -float("inf"), None, None
         for a in self.valid_actions:
             edge = self.edges[a]
@@ -34,6 +49,7 @@ class Node:
                 max_f = u
                 best_a = a
                 best_edge = edge
+        print("get_next_search_edge: ", time() - t1)
         return max_f, best_a, best_edge
 
     def get_best_N_edge(self):
@@ -103,10 +119,7 @@ def search(net, current_node):
     # print("searching...")
     # current_node.s.print_board()
     s = current_node.s
-    if s.is_game_ended():
-        # print("game ended")
-        # print(s.print_board())
-        # print(s.reward())
+    if get_game_ended(s):
         return s.reward()
 
     # otherwise, select best edge and search

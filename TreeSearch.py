@@ -1,6 +1,8 @@
 from gobang_board import *
 from random import randint
 from math import sqrt
+from model import GoBangNet
+import numpy as np
 
 c_puct = 1
 DEFAULT_SEARCH_COUNT = 800
@@ -39,7 +41,7 @@ class TreeSearch:
                 if valid_moves[a]:
                     if (board, a) in self.Qsa:
                         u = self.Qsa[(board, a)] + c_puct * self.Ps[board][a] * sqrt(self.Ns[board]) / (
-                                    1 + self.Nsa[(board, a)])
+                                1 + self.Nsa[(board, a)])
                     else:  # (s, a) not in Qsa and Nsa
                         u = c_puct * self.Ps[board][a] * sqrt(self.Ns[board])  # Qsa[(s, a)] = 0
 
@@ -55,7 +57,7 @@ class TreeSearch:
             self.Ns[board] += 1
             if (board, best_a) in self.Qsa:
                 self.Qsa[(board, best_a)] = (self.Nsa[(board, best_a)] * self.Qsa[(board, best_a)] + v) / (
-                            self.Nsa[(board, best_a)] + 1)
+                        self.Nsa[(board, best_a)] + 1)
                 self.Nsa[(board, best_a)] += 1
             else:
                 self.Qsa[(board, best_a)] = v
@@ -64,14 +66,16 @@ class TreeSearch:
             return v
         else:  # is a leaf node
             p, v = self.net.predict(s)
-            # p = p.cpu()
+            p = p.numpy()
             # v = v.cpu()
             valid_moves = s.get_valid_actions()
+            # print('type v:', type(valid_moves))
             self.Vs[board] = valid_moves
             p = p * valid_moves
             p /= p.sum()
             self.Ps[board] = p
             self.Ns[board] = 0
+            # print('type:', type(p))
             return v
 
     def get_pi(self, s, tau):
@@ -96,24 +100,44 @@ class TreeSearch:
         for i in range(search_count):
             self.search(self.root)
 
-    def get_pi_and_move(self, tau):
+    def get_pi_and_get_move(self, tau):
         pi_distribution = self.get_pi(self.root, tau)
         move = np.random.choice(225, p=pi_distribution)
         return pi_distribution, move
 
-data = []
-from model import GoBangNet
-net = GoBangNet().cuda()
-tree = TreeSearch(net)
-while not tree.root.is_game_ended():
-    t1 = time.time()
-    tree.search_from_root(100)
-    pi_distribution, move = tree.get_pi_and_move(0)
-    tree.root = tree.root.move(move)
-    data.append((tree.root, pi_distribution))
-    # tree.root.print_board()
-    print(time.time() - t1)
+    def progress(self, move):
+        self.root = self.root.move(move)
+        board = self.root.get_str_representation()
+        # print(type(self.Ps[board]))
+        self.Ps[board] = 0.1 * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
-print(tree.root.get_reward())
-tree.root.print_board()
-print(tree.root.current_player)
+
+def generate_single_game(net, print_every_step=False):
+    t1 = time.time()
+    data = []
+    tree = TreeSearch(net)
+    while not tree.root.is_game_ended():
+        tree.search_from_root(200)
+        pi_distribution, move = tree.get_pi_and_get_move(tau=0)
+        data.append([(tree.root.black, tree.root.white, tree.root.turn), pi_distribution])
+        # tree.root = tree.root.move(move)
+        tree.progress(move)
+        if print_every_step:
+            tree.root.print_board()
+
+    print(tree.root.get_reward())
+    tree.root.print_board()
+    print(tree.root.current_player)
+
+    r = tree.root.get_reward()
+    r *= -1
+    for i in range(len(data) - 1, -1, -1):
+        data[i].append(r)
+        r *= -1
+
+    print('generate single game time (s):', time.time() - t1)
+    # for i in data:
+    #     print(i)
+    return data
+
+# generate_single_game()

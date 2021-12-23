@@ -233,26 +233,3 @@ class GoBangBoard:
         else:
             return 0
 
-# if __name__ == '__main__':
-#     board = GoBangBoard()
-#     board = board.move(3, 3)
-#     board = board.move(4, 3)
-#     board = board.move_count(3, 4)
-#     board = board.move_count(4, 4)
-#     board = board.move_count(3, 5)
-#     board = board.move_count(4, 5)
-#     board = board.move_count(3, 6)
-#     board = board.move_count(4, 6)
-#     board = board.move_count(3, 7)
-#
-#     board.print_board()
-#
-#     print(board.is_game_ended())
-#
-#     for i in range(100):
-#         try:
-#             board = board.move_count(randint(0, 14), randint(0, 14))
-#         except ValueError:
-#             pass
-#     print(board.is_game_ended())
-#     board.print_board()

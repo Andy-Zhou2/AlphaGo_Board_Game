@@ -150,6 +150,8 @@ class GoBangNet(nn.Module):
                 value = value[0]
             return policy.cpu(), value.cpu()
 
+    def load_param(self, path):
+        self.load_state_dict(t.load(path)['weight'])
 
 if __name__ == '__main__':
     model = GoBangNet()

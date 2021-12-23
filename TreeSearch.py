@@ -109,9 +109,13 @@ class TreeSearch:
 
     def progress(self, move):
         self.root = self.root.move(move)
-        board = self.root.get_str_representation()
-        # print(type(self.Ps[board]))
-        self.Ps[board] = 0.1 * np.random.dirichlet(np.ones(225)) + self.Ps[board]
+        # board = self.root.get_str_representation()
+        self.add_noise(self.root, 0.3)
+        # self.Ps[board] = 0.1 * np.random.dirichlet(np.ones(225)) + self.Ps[board]
+
+    def add_noise(self, s, noise_level=0.3):
+        board = s.get_str_representation()
+        self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
 
 def generate_single_game(net, print_every_step=False):

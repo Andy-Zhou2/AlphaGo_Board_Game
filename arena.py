@@ -62,12 +62,16 @@ for i in range(10):
 
     while not game_now.is_game_ended():
         if player_now == Player.BLACK:
-            for search_count in range(200):
+            tree1.search(game_now)
+            tree1.add_noise(game_now, 0.3)
+            for search_count in range(800):
                 tree1.search(game_now)
             _, move = tree1.get_pi_and_get_move(0, game_now)
             game_now = game_now.move(move)
             player_now = Player.WHITE
         else:
+            tree2.search(game_now)
+            tree2.add_noise(game_now, 0.3)
             for search_count in range(200):
                 tree2.search(game_now)
             _, move = tree2.get_pi_and_get_move(0, game_now)

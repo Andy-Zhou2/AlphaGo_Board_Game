@@ -100,8 +100,10 @@ class TreeSearch:
         for i in range(search_count):
             self.search(self.root)
 
-    def get_pi_and_get_move(self, tau):
-        pi_distribution = self.get_pi(self.root, tau)
+    def get_pi_and_get_move(self, tau, target=None):
+        if target is None:
+            target = self.root
+        pi_distribution = self.get_pi(target, tau)
         move = np.random.choice(225, p=pi_distribution)
         return pi_distribution, move
 

@@ -27,7 +27,7 @@ def loss_function(policy_out, value_out, policy_pi, value_z):
 if __name__ == '__main__':
     GPU = t.device("cuda:0")
     net = GoBangNet()
-    net.load_param('./data/nets/baseline.net')
+    net.load_param('./data/nets/test_1_model_DNN.net')
     net = net.to(GPU)
 
     train_dataset = GameData()
@@ -62,4 +62,4 @@ if __name__ == '__main__':
     state = {"weight": net.state_dict()}
     # if 'model' not in os.listdir('./data/nets'):
     #     os.mkdir('model')
-    t.save(state, os.path.join('./data/nets', f'test_1_model_DNN.net'))
+    t.save(state, os.path.join('./data/nets', f'test_2_model_DNN.net'))

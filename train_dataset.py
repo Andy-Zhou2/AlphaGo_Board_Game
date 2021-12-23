@@ -11,8 +11,15 @@ def get_binary_info(path):
 
 
 data_path = rf'./data/games'
-filename = rf'test_data.pkl'
-training_set = get_binary_info(os.path.join(data_path, filename))
+# filename = rf'test_data.pkl'
+training_set = [] #get_binary_info(os.path.join(data_path, filename))
+
+for i in range(1, 22):
+    filename = f'5_games_200_gen_2_search_{i}.pkl'
+    training_set.extend(get_binary_info(os.path.join(data_path, filename)))
+for i in range(1, 22):
+    filename = f'5_games_200_gen_2_script_1_search_{i}.pkl'
+    training_set.extend(get_binary_info(os.path.join(data_path, filename)))
 
 
 class GameData(Dataset):

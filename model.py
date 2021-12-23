@@ -136,6 +136,9 @@ class GoBangNet(nn.Module):
 
         return policy, value
 
+    def load_param(self, path):
+        self.load_state_dict(t.load(path)['weight'])
+
     def predict(self, x):
         with t.no_grad():
             flag = False
@@ -149,9 +152,6 @@ class GoBangNet(nn.Module):
                 policy = policy[0]
                 value = value[0]
             return policy.cpu(), value.cpu()
-
-    def load_param(self, path):
-        self.load_state_dict(t.load(path)['weight'])
 
 if __name__ == '__main__':
     import os

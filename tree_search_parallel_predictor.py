@@ -10,8 +10,8 @@ DEFAULT_SEARCH_COUNT = 800
 
 
 class TreeSearch:
-    def __init__(self, net):
-        self.net = net
+    def __init__(self, predictor):
+        self.net = predictor
 
         self.Qsa = dict()  # Q[(s, a)]
         self.Nsa = dict()  # N[(s, a)]
@@ -74,7 +74,7 @@ class TreeSearch:
     def expand(self, s):
         board = s.get_str_representation()
         p, v = self.net.predict(s)
-        p = p.numpy()
+        # p = p.numpy()
         valid_moves = s.get_valid_actions()
         self.Vs[board] = valid_moves
         p = p * valid_moves
@@ -126,12 +126,13 @@ class TreeSearch:
         self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
 
-def generate_single_game(net, print_every_step=False, sim_per_step=200):
-    t1 = time.time()
+def generate_single_game(predictor, index, print_every_step=False, sim_per_step=200):
+    print(f'start working on {index}')
     data = []
-    tree = TreeSearch(net)
+    tree = TreeSearch(predictor)
     move_count = 0
     while not tree.root.is_game_ended():
+        t1 = time.time()
         tree.search_from_root(sim_per_step)
         pi_distribution, move = tree.get_pi_and_get_move(tau=0 if move_count > 15 else 1)
         new_data = get_symmetries((tree.root.black, tree.root.white, tree.root.turn), pi_distribution)
@@ -143,6 +144,7 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
             print(move)
         tree.progress(move)
         move_count += 1
+        print(f'move time for {index} (s):', time.time() - t1)
         if print_every_step:
             tree.root.print_board()
 
@@ -159,7 +161,6 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
         r *= -1
         all_data.extend(data[i])
 
-    print('generate single game time (s):', time.time() - t1)
     return data
 
 

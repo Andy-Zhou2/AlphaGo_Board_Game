@@ -154,71 +154,8 @@ class GoBangNet(nn.Module):
         self.load_state_dict(t.load(path)['weight'])
 
 if __name__ == '__main__':
-    model = GoBangNet()
-    model.eval()
-    model.to('cuda')
-    from time import time
-    # t1 = time()
-    # for i in range(10):
-    #     model(t.rand(1024, 3, 15, 15).to('cuda'))
-    # print(time() - t1)
+    import os
+    net = GoBangNet()
+    state = {"weight": net.state_dict()}
+    t.save(state, os.path.join('./data/nets', f'gen_0.net'))
 
-    a = t.rand(512, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(1024, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(1024, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(1024, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(32, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(16, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(8, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(4, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(2, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)
-
-    a = t.rand(1, 3, 15, 15).to('cuda')
-    t1 = time()
-    for i in range(1):
-        model(a)
-    print(time() - t1)

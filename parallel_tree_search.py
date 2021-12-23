@@ -121,7 +121,6 @@ class TreeSearch:
     def add_noise(self, s, noise_level=0.3):
         board = s.get_str_representation()
         if board not in self.Ps:
-            print('note! add noise to un-expanded node')
             self.expand(s)
         self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
@@ -133,14 +132,10 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
     move_count = 0
     while not tree.root.is_game_ended():
         tree.search_from_root(sim_per_step)
-        pi_distribution, move = tree.get_pi_and_get_move(tau=0 if move_count > 15 else 1)
+        pi_distribution, move = tree.get_pi_and_get_move(tau=0) # if move_count > 15 else 1)
         new_data = get_symmetries((tree.root.black, tree.root.white, tree.root.turn), pi_distribution)
         data.extend(new_data)
-        if tree.Nsa[(tree.root.get_str_representation(), move)] == 0:
-            print('note: selecting a move with 0 visit')
-            board = tree.root.get_str_representation()
-            print(np.array([tree.Nsa[(board, a)] if (board, a) in tree.Nsa else 0 for a in range(225)]))
-            print(move)
+        # print(tree.Nsa[tree.root.get_str_representation()])
         tree.progress(move)
         move_count += 1
         if print_every_step:
@@ -157,8 +152,5 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
         r *= -1
 
     print('generate single game time (s):', time.time() - t1)
-    # for i in data:
-    #     print(i)
     return data
 
-# generate_single_game()

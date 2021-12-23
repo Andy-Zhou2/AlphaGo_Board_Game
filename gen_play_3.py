@@ -11,6 +11,6 @@ while True:
     for i in range(5):
         data.extend(generate_single_game(net, False, 800))
 
-    with open(f'./data/games/5_games_800_gen_0_script_2_search_{count}.pkl', 'wb') as f:
+    with open(f'./data/games/5_games_800_gen_0_script_3_search_{count}.pkl', 'wb') as f:
         pickle.dump(data, f)
     count += 1

@@ -109,17 +109,21 @@ def normalize_actions_probability(p, valid_actions_mask) -> np.array:
     p = p * valid_actions_mask
     p = p / p.sum()
     return p
-    #
-    # result = dict()
-    # sum_valid_pr = 0
-    #
-    # for a in valid_actions:
-    #     sum_valid_pr += p[coord_to_index(a)]
-    #
-    # for a in valid_actions:
-    #     result[a] = p[coord_to_index(a)] / sum_valid_pr
-    #
-    # return result
+
+
+def get_symmetries(board, pi):
+    pi_board = np.reshape(pi, (15, 15))
+    result = []
+
+    for i in range(1, 5):
+        for j in [True, False]:
+            newB = np.rot90(board, i)
+            newPi = np.rot90(pi_board, i)
+            if j:
+                newB = np.fliplr(newB)
+                newPi = np.fliplr(newPi)
+            result.append([newB, newPi.ravel()])
+    return result
 
 
 class GoBangBoard:
@@ -232,4 +236,3 @@ class GoBangBoard:
             return -1 if self.current_player == Player.WHITE else 1
         else:
             return 0
-

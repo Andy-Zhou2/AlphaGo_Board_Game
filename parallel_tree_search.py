@@ -134,7 +134,7 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
         tree.search_from_root(sim_per_step)
         pi_distribution, move = tree.get_pi_and_get_move(tau=0) # if move_count > 15 else 1)
         new_data = get_symmetries((tree.root.black, tree.root.white, tree.root.turn), pi_distribution)
-        data.extend(new_data)
+        data.append(new_data)
         # print(tree.Nsa[tree.root.get_str_representation()])
         tree.progress(move)
         move_count += 1
@@ -147,9 +147,12 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
 
     r = tree.root.get_reward()
     r *= -1
+    all_data = []
     for i in range(len(data) - 1, -1, -1):
-        data[i].append(r)
+        for sym in range(8):
+            data[i][sym].append(r)
         r *= -1
+        all_data.extend(data[i])
 
     print('generate single game time (s):', time.time() - t1)
     return data

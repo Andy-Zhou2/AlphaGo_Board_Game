@@ -114,15 +114,18 @@ def normalize_actions_probability(p, valid_actions_mask) -> np.array:
 def get_symmetries(board, pi):
     pi_board = np.reshape(pi, (15, 15))
     result = []
+    black_board, white_board, turn_board = board
 
     for i in range(1, 5):
         for j in [True, False]:
-            newB = np.rot90(board, i)
+            newB = np.rot90(black_board, i)
+            newW = np.rot90(white_board, i)
             newPi = np.rot90(pi_board, i)
             if j:
                 newB = np.fliplr(newB)
+                newW = np.fliplr(newW)
                 newPi = np.fliplr(newPi)
-            result.append([newB, newPi.ravel()])
+            result.append([(newB, newW, turn_board), newPi.ravel()])
     return result
 
 

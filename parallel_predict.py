@@ -6,7 +6,7 @@ from tree_search_parallel_predictor import generate_single_game
 from threading import Thread
 from model import GoBangNet
 
-PREDICTION_BATCH_SIZE = 1
+PREDICTION_BATCH_SIZE = 3
 
 
 class ParallelPredictor:
@@ -38,15 +38,15 @@ class ParallelPredictor:
             self.not_computing.wait()
             # info(f'processing {count}')
             self.input_queue.append(board)
-            print('input queue', len(self.input_queue))
+            # print('input queue', len(self.input_queue))
             position = len(self.input_queue) - 1
             batch_number = len(self.results)
             # info(f'get info: {batch_number}, {position}, {input_queue}')
-        if len(self.input_queue) == PREDICTION_BATCH_SIZE and not self.computing.is_set():
-            Thread(target=self.prediction, args=[self.input_queue]).start()
-            self.computing.set()
-            self.not_computing.clear()
-            self.input_queue = []
+            if len(self.input_queue) == PREDICTION_BATCH_SIZE and not self.computing.is_set():
+                Thread(target=self.prediction, args=[self.input_queue]).start()
+                self.computing.set()
+                self.not_computing.clear()
+                self.input_queue = []
         self.computing.wait()
         self.not_computing.wait()
         # print(self.results[batch_number][0][position], self.results[batch_number][1][position])
@@ -91,7 +91,9 @@ def run_self_play(gen_id):
 
 t1 = Thread(target=run_self_play, args=[0])
 t2 = Thread(target=run_self_play, args=[1])
+t3 = Thread(target=run_self_play, args=[2])
 
 t1.start()
 t2.start()
+t3.start()
 

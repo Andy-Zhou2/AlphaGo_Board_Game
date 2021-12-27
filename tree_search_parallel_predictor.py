@@ -121,7 +121,8 @@ class TreeSearch:
     def add_noise(self, s, noise_level=0.3):
         board = s.get_str_representation()
         if board not in self.Ps:
-            print('note! add noise to un-expanded node')
+            print('note! add noise to un-expanded node; possibly reaching terminal state')
+            print(self.Es[board])
             self.expand(s)
         self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 

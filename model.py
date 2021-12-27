@@ -151,7 +151,7 @@ class GoBangNet(nn.Module):
             if flag:
                 policy = policy[0]
                 value = value[0]
-            return policy.cpu(), value.cpu()
+            return policy.cpu(), value.cpu().item()
 
 if __name__ == '__main__':
     import os

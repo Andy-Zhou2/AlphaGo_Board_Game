@@ -6,7 +6,8 @@ from tree_search_parallel_predictor import generate_single_game
 from threading import Thread
 from model import GoBangNet
 
-PREDICTION_BATCH_SIZE = 32
+
+PREDICTION_BATCH_SIZE = 1
 
 
 class ParallelPredictor:
@@ -26,12 +27,9 @@ class ParallelPredictor:
         for i in range(PREDICTION_BATCH_SIZE):
             n[i] = boards[i]
         # boards = t.Tensor(boards).cuda()
-        # print(f"Submitting shape {n.shape} for prediction")
+        # print(f"Submitting {n.shape} for prediction")
         policy, value = self.net(n)
-        # print("Received result at prediction()")
         self.results.append((policy.detach().cpu().numpy(), value.detach().cpu().numpy()))
-
-        # print(f"Finished computation")
 
         self.not_computing.set()
         self.computing.clear()
@@ -41,7 +39,7 @@ class ParallelPredictor:
             self.not_computing.wait()
             # info(f'processing {count}')
             self.input_queue.append(board)
-            # print('input queue has length', len(self.input_queue))
+            # print('input queue', len(self.input_queue))
             position = len(self.input_queue) - 1
             batch_number = len(self.results)
             # info(f'get info: {batch_number}, {position}, {input_queue}')
@@ -75,28 +73,28 @@ class ParallelPredictor:
                 value = value[0]
             return policy, value
 
-net = GoBangNet().cuda()
-net.load_param('./data/nets/gen_0.net')
 
-predictor = ParallelPredictor(net)
 
 def run_self_play(gen_id):
     try:
-        generate_single_game(predictor, gen_id, False, 200)
+        generate_single_game(net, gen_id, False, 200)
     except Exception as e:
         print(e)
 
-with ThreadPoolExecutor(max_workers=32) as executor:
-    for index in range(32):
-        executor.submit(run_self_play, index)
 
-# run_self_play(0)
+from multiprocessing import Pool, Process
 
-# t1 = Thread(target=run_self_play, args=[0])
-# t2 = Thread(target=run_self_play, args=[1])
-# t3 = Thread(target=run_self_play, args=[2])
-#
-# t1.start()
-# t2.start()
-# t3.start()
+net = GoBangNet().cuda()
+net.load_param('./data/nets/gen_0.net')
 
+# predictor = ParallelPredictor(net)
+
+if __name__ == '__main__':
+    with Pool(3) as p:
+        p.map(run_self_play, range(5))
+
+    # p1 = Process(target=run_self_play, args=(0, predictor))
+    # p1.start()
+    # p1.join()
+
+# generate_single_game(net, 0, False, 200)

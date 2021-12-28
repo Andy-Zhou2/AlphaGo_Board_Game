@@ -236,6 +236,6 @@ class GoBangBoard:
         if self.is_black_win():
             return 1 if self.current_player == Player.BLACK else -1
         elif self.is_white_win():
-            return -1 if self.current_player == Player.WHITE else 1
+            return 1 if self.current_player == Player.WHITE else -1
         else:
             return 0

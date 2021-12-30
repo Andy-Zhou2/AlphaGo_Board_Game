@@ -9,25 +9,15 @@ import time
 
 
 def loss_function(policy_out, value_out, policy_pi, value_z):
-    # print(policy_out.device)
-    # print(value_out.device)
-    # print(policy_pi.device)
-    # print(value_z.device)
-    # policy_out += 1e-7
-    # print(t.min(policy_out))
     l = ((value_z - value_out) ** 2).squeeze(1) - t.sum(policy_pi * t.log(policy_out + 1e-7), dim=1)
-    # print(((value_z - value_out) ** 2).squeeze(1).shape)
-    # print((t.sum(policy_pi * t.log(policy_out), dim=1).shape))
-    # print(l.shape)
     l = t.sum(l, dim=0)
-    # print('loss:', l)
     return l
 
 
 if __name__ == '__main__':
     GPU = t.device("cuda:0")
     net = GoBangNet()
-    net.load_param('./data/nets/test_1_model_DNN.net')
+    net.load_param('./data/nets/gen_4.net')
     net = net.to(GPU)
 
     train_dataset = GameData()
@@ -38,7 +28,7 @@ if __name__ == '__main__':
     loss_all = []
     last_change_lr = 0
     model_count = 1
-    for epoch in range(1, 40):
+    for epoch in range(1, 41):
         print(f'start_epoch: {epoch}')
         epoch_start_time = time.time()
         loss_epoch = 0
@@ -60,6 +50,5 @@ if __name__ == '__main__':
         print('epoch time:', epoch_time)
 
     state = {"weight": net.state_dict()}
-    # if 'model' not in os.listdir('./data/nets'):
-    #     os.mkdir('model')
-    t.save(state, os.path.join('./data/nets', f'test_2_model_DNN.net'))
+
+    t.save(state, os.path.join('./data/nets', f'gen_5.net'))

@@ -24,37 +24,6 @@ class TreeSearch:
 
         self.root = GoBangBoard()
 
-    def search_every_move(self, s):
-        board = s.get_str_representation()
-        if board not in self.Es:
-            self.Es[board] = s.is_game_ended()
-        if self.Es[board]:
-            if board not in self.Rs:
-                self.Rs[board] = s.get_reward()
-            return self.Rs[board]
-
-        if board in self.Ns:  # must be, otherwise game is ending
-            valid_moves = self.Vs[board]
-
-            for a in range(225):
-                if valid_moves[a]:
-                    best_a = a
-                    next_s = s.move(a)
-                    v = self.search(next_s)
-
-                    v *= -1  # changes into win rate of current player
-
-                    self.Ns[board] += 1
-                    if (board, best_a) in self.Qsa:
-                        self.Qsa[(board, best_a)] = (self.Nsa[(board, best_a)] * self.Qsa[(board, best_a)] + v) / (
-                                self.Nsa[(board, best_a)] + 1)
-                        self.Nsa[(board, best_a)] += 1
-                    else:
-                        self.Qsa[(board, best_a)] = v
-                        self.Nsa[(board, best_a)] = 1
-        self.get_pi(s, 1)
-        print('above is after every')
-
     def search(self, s):
         board = s.get_str_representation()
         if board not in self.Es:
@@ -78,12 +47,10 @@ class TreeSearch:
                         u = c_puct * self.Ps[board][a] * sqrt(self.Ns[board] + 1e-7)
                         # Qsa[(s, a)] = 0, to prevent all zeros
 
-                    # print(a, ':', u, file=open('file.txt', 'a'))
+                    # print('u:', u)
                     if u > best_confidence:
                         best_confidence = u
                         best_a = a
-            # print('best u, a:', best_confidence, best_a, file=open('file.txt', 'a'))
-            # print('----------------------', file=open('file.txt', 'a'))
 
             next_s = s.move(best_a)
             v = self.search(next_s)
@@ -119,20 +86,7 @@ class TreeSearch:
     def get_pi(self, s, tau):
         board = s.get_str_representation()
         counts = np.array([self.Nsa[(board, a)] if (board, a) in self.Nsa else 0 for a in range(225)])
-
-        args = np.flip(np.argsort(counts))
-        print('top 10 moves')
-        for i in range(225):  # print top 10 moves
-            index = args[i]
-            print(counts[index], index_to_coord(index),
-                  self.Nsa[(board, index)] if (board, index) in self.Nsa else 0,
-                  self.Qsa[(board, index)] if (board, index) in self.Qsa else "not in Qsa",
-                  self.Ps[board][index],
-                  self.Qsa[(board, index)] + c_puct * self.Ps[board][index] * sqrt(self.Ns[board]) / (
-                          1 + self.Nsa[(board, index)]) if (board, index) in self.Qsa else
-                  c_puct * self.Ps[board][index] * sqrt(self.Ns[board] + 1e-7)
-                  )
-
+        # print('counts:', counts)
         # counts = counts * self.Vs[s]
         if np.max(counts) == 0:
             print('warning! max N is 0!')
@@ -150,7 +104,6 @@ class TreeSearch:
     def search_from_root(self, search_count=DEFAULT_SEARCH_COUNT):
         for i in range(search_count):
             self.search(self.root)
-            print('search count:', i)
 
     def get_pi_and_get_move(self, tau, target=None):
         if target is None:
@@ -174,25 +127,12 @@ class TreeSearch:
 
 
 def generate_single_game(net, print_every_step=False, sim_per_step=200):
-    black = np.zeros([15, 15])
-    white = np.zeros([15, 15])
-    turn = np.zeros([15, 15])
-    black[0, 0:4] = 1
-    init_board = GoBangBoard((black, white, turn))
-
-
     t1 = time.time()
     data = []
     tree = TreeSearch(net)
-
-    tree.root = init_board
-    tree.expand(tree.root)
-    tree.add_noise(tree.root, 0.3)
-
     move_count = 0
     while not tree.root.is_game_ended():
         t2 = time.time()
-        tree.search_every_move(tree.root)
         tree.search_from_root(sim_per_step)
         pi_distribution, move = tree.get_pi_and_get_move(tau=0 if move_count > 15 else 1)
         new_data = get_symmetries((tree.root.black, tree.root.white, tree.root.turn), pi_distribution)
@@ -207,8 +147,6 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
         if print_every_step:
             tree.root.print_board()
         print('time per step:', time.time() - t2)
-        import sys
-        sys.exit(0)
 
     print(tree.root.get_reward())
     tree.root.print_board()
@@ -224,4 +162,6 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
         all_data.extend(data[i])
 
     print('generate single game time (s):', time.time() - t1)
-    return data
+    return all_data
+
+

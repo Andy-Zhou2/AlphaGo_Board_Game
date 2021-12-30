@@ -9,18 +9,15 @@ def get_binary_info(path):
         result = pickle.load(file)
     return result
 
-
 data_path = rf'./data/games'
-# filename = rf'test_data.pkl'
-training_set = [] #get_binary_info(os.path.join(data_path, filename))
+training_set = []
 
-for i in range(1, 22):
-    filename = f'5_games_200_gen_2_search_{i}.pkl'
-    training_set.extend(get_binary_info(os.path.join(data_path, filename)))
-for i in range(1, 22):
-    filename = f'5_games_200_gen_2_script_1_search_{i}.pkl'
+for i in range(40):
+    filename = f'1_game_800_gen_3_thread_{i}.pkl'
+    print(filename, 'has #data', len(get_binary_info(os.path.join(data_path, filename))))
     training_set.extend(get_binary_info(os.path.join(data_path, filename)))
 
+print('training set length', len(training_set))
 
 class GameData(Dataset):
     def __init__(self):

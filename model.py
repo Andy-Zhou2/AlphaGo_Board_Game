@@ -1,3 +1,4 @@
+import numpy as np
 import torch as t
 import torch.nn as nn
 from gobang_board import GoBangBoard
@@ -144,7 +145,7 @@ class GoBangNet(nn.Module):
             flag = False
             if isinstance(x, GoBangBoard):
                 flag = True
-                x = t.Tensor([x.black, x.white, x.turn])
+                x = t.Tensor(np.array([x.black, x.white, x.turn]))
                 x = x.unsqueeze(0)
                 x = x.cuda()
             policy, value = self.forward(x)

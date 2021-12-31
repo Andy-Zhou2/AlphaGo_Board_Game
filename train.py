@@ -14,20 +14,17 @@ def loss_function(policy_out, value_out, policy_pi, value_z):
     return l
 
 
-if __name__ == '__main__':
+def train(old_gen):
     GPU = t.device("cuda:0")
     net = GoBangNet()
-    net.load_param('./data/nets/gen_4.net')
+    net.load_param(f'./data/nets/gen_{old_gen}.net')
     net = net.to(GPU)
 
-    train_dataset = GameData()
+    train_dataset = GameData(old_gen)
     train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True, pin_memory=True, num_workers=0)
 
     optimizer = optim.SGD(net.parameters(), lr=0.001, weight_decay=0.0001)
 
-    loss_all = []
-    last_change_lr = 0
-    model_count = 1
     for epoch in range(1, 41):
         print(f'start_epoch: {epoch}')
         epoch_start_time = time.time()
@@ -46,9 +43,14 @@ if __name__ == '__main__':
             optimizer.step()
 
         print('epoch, loss:', epoch, loss_epoch)
+        if epoch == 1:
+            first_loss = loss_epoch
+        if epoch == 40:
+            last_loss = loss_epoch
         epoch_time = time.time() - epoch_start_time
         print('epoch time:', epoch_time)
 
     state = {"weight": net.state_dict()}
 
-    t.save(state, os.path.join('./data/nets', f'gen_5.net'))
+    t.save(state, os.path.join('./data/nets', f'gen_{old_gen+1}.net'))
+    return first_loss, last_loss

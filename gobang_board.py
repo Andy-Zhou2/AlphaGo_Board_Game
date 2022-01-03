@@ -150,10 +150,12 @@ class GoBangBoard:
         """
         return np.concatenate([self.black, self.white, self.turn]).tostring()
 
-    def print_board(self):
+    def print_board(self, last_move=None):
         horizontal_line_length = 61
         str_board = [['●' if self.black[i][j] else '○' if self.white[i][j] else ' ' for j in range(15)]
                      for i in range(15)]
+        if last_move is not None:
+            str_board[last_move//15][last_move%15] = '△' if self.current_player == Player.BLACK else '▲'
         for i in range(15):
             print('-' * horizontal_line_length)
             print('| ', end='')

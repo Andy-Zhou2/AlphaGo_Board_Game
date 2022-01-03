@@ -25,7 +25,7 @@ def train(old_gen):
 
     optimizer = optim.SGD(net.parameters(), lr=0.001, weight_decay=0.0001)
 
-    for epoch in range(1, 41):
+    for epoch in range(1, 21):
         print(f'start_epoch: {epoch}')
         epoch_start_time = time.time()
         loss_epoch = 0
@@ -45,7 +45,7 @@ def train(old_gen):
         print('epoch, loss:', epoch, loss_epoch)
         if epoch == 1:
             first_loss = loss_epoch
-        if epoch == 40:
+        if epoch == 20:
             last_loss = loss_epoch
         epoch_time = time.time() - epoch_start_time
         print('epoch time:', epoch_time)

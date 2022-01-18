@@ -14,7 +14,7 @@ def loss_function(policy_out, value_out, policy_pi, value_z):
     return l
 
 
-def train(old_gen):
+def train(old_gen, lr=0.001):
     GPU = t.device("cuda:0")
     net = GoBangNet()
     net.load_param(f'./data/nets/gen_{old_gen}.net')
@@ -23,7 +23,7 @@ def train(old_gen):
     train_dataset = GameData(old_gen)
     train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True, pin_memory=True, num_workers=0)
 
-    optimizer = optim.SGD(net.parameters(), lr=0.001, weight_decay=0.0001)
+    optimizer = optim.SGD(net.parameters(), lr=lr, weight_decay=0.0001)
 
     for epoch in range(1, 21):
         print(f'start_epoch: {epoch}')

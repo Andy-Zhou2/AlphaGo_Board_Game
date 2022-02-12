@@ -3,4 +3,4 @@ from train import train
 from arena import battle
 from datetime import datetime
 
-battle(27, 21, search_num=800)
+battle(77, 77, search_num=1600, num_games_each_side=1)

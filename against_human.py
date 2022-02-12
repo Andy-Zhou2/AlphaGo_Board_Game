@@ -6,10 +6,11 @@ import numpy as np
 
 
 net_path = './data/nets'
-net_filename = f"gen_{28}.net"
+net_filename = f"gen_{86}.net"
 
 search_num = 800
-human_plays_black = False
+
+human_plays_black = 0
 
 net = GoBangNet().cuda()
 net.load_param(os.path.join(net_path, net_filename))

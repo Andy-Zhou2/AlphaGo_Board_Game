@@ -5,7 +5,7 @@ from model import GoBangNet
 from gobang_board import get_symmetries
 import numpy as np
 
-c_puct = 2.5
+c_puct = 1
 DEFAULT_SEARCH_COUNT = 800
 
 

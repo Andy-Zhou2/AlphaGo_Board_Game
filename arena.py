@@ -44,7 +44,7 @@ def battle(gen1, gen2, num_games_each_side=10, search_num=200, noise=0.05):
                 _, move = tree2.get_pi_and_get_move(0, game_now)
                 game_now = game_now.move(move)
                 player_now = Player.BLACK
-            game_now.print_board(move)
+            game_now.print_board()
             print('move: ', index_to_coord(move))
 
         if game_now.is_black_win():
@@ -88,7 +88,7 @@ def battle(gen1, gen2, num_games_each_side=10, search_num=200, noise=0.05):
                 _, move = tree2.get_pi_and_get_move(0, game_now)
                 game_now = game_now.move(move)
                 player_now = Player.BLACK
-            game_now.print_board(move)
+            game_now.print_board()
             print('move: ', index_to_coord(move))
 
         if game_now.is_black_win():

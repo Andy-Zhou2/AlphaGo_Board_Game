@@ -87,23 +87,6 @@ class GoBangNet(nn.Module):
         self.res_block1 = ResBlk()
         self.res_block2 = ResBlk()
         self.res_block3 = ResBlk()
-        self.res_block4 = ResBlk()
-        self.res_block5 = ResBlk()
-        self.res_block6 = ResBlk()
-        self.res_block7 = ResBlk()
-        self.res_block8 = ResBlk()
-        self.res_block9 = ResBlk()
-        self.res_block10 = ResBlk()
-        self.res_block11 = ResBlk()
-        self.res_block12 = ResBlk()
-        self.res_block13 = ResBlk()
-        self.res_block14 = ResBlk()
-        self.res_block15 = ResBlk()
-        self.res_block16 = ResBlk()
-        self.res_block17 = ResBlk()
-        self.res_block18 = ResBlk()
-        self.res_block19 = ResBlk()
-        self.res_block20 = ResBlk()
 
         self.policy_head = PolicyHead()
         self.value_head = ValueHead()
@@ -114,23 +97,6 @@ class GoBangNet(nn.Module):
         x = self.res_block1(x)
         x = self.res_block2(x)
         x = self.res_block3(x)
-        x = self.res_block4(x)
-        x = self.res_block5(x)
-        x = self.res_block6(x)
-        x = self.res_block7(x)
-        x = self.res_block8(x)
-        x = self.res_block9(x)
-        x = self.res_block10(x)
-        x = self.res_block11(x)
-        x = self.res_block12(x)
-        x = self.res_block13(x)
-        x = self.res_block14(x)
-        x = self.res_block15(x)
-        x = self.res_block16(x)
-        x = self.res_block17(x)
-        x = self.res_block18(x)
-        x = self.res_block19(x)
-        x = self.res_block20(x)
 
         policy = self.policy_head(x)
         value = self.value_head(x)
@@ -142,21 +108,86 @@ class GoBangNet(nn.Module):
 
     def predict(self, x):
         with t.no_grad():
-            flag = False
+            flag_single_board = False
             if isinstance(x, GoBangBoard):
-                flag = True
-                x = t.Tensor(np.array([x.black, x.white, x.turn]))
-                x = x.unsqueeze(0)
-                x = x.cuda()
+                flag_single_board = True
+                x = x.get_network_input().cuda()
             policy, value = self.forward(x)
-            if flag:
+            if flag_single_board:
                 policy = policy[0]
                 value = value[0]
             return policy.cpu(), value.cpu().item()
 
 if __name__ == '__main__':
     import os
-    net = GoBangNet()
-    state = {"weight": net.state_dict()}
+    model = GoBangNet().cuda()
+    state = {"weight": model.state_dict()}
     t.save(state, os.path.join('./data/nets', f'gen_0.net'))
 
+    a = t.rand(512, 3, 15, 15).to('cuda')
+
+    board = GoBangBoard()
+    t1 = time()
+    for i in range(100):
+        x = board.get_network_input().cuda()
+        model.predict(x)
+    print(time() - t1)
+
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(1024, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(1024, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(1024, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(32, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(16, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(8, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(4, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(2, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)
+
+    a = t.rand(1, 3, 15, 15).to('cuda')
+    t1 = time()
+    for i in range(1):
+        model(a)
+    print(time() - t1)

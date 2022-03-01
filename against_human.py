@@ -6,11 +6,11 @@ import numpy as np
 
 
 net_path = './data/nets'
-net_filename = f"gen_{86}.net"
+net_filename = f"gen_{2000}.net"
 
-search_num = 800
+search_num = 2000
 
-human_plays_black = 0
+human_plays_black = 1
 
 net = GoBangNet().cuda()
 net.load_param(os.path.join(net_path, net_filename))
@@ -45,7 +45,7 @@ while not game_now.is_game_ended():
         move = coord_to_index([x, y])
         game_now = game_now.move(move)
         player_now = Player.WHITE if player_now == Player.BLACK else Player.BLACK
-        game_now.print_board(move)
+        game_now.print_board()
     else:
         print('computer thinking...')
         policy, value = net.predict(game_now)
@@ -61,7 +61,7 @@ while not game_now.is_game_ended():
         _, move = tree.get_pi_and_get_move(0, game_now)
         game_now = game_now.move(move)
         player_now = Player.WHITE if player_now == Player.BLACK else Player.BLACK
-        game_now.print_board(move)
+        game_now.print_board()
         print('move: ', index_to_coord(move))
         policy, value = net.predict(game_now)
         print('computer thinks that win rate for you is:', value)

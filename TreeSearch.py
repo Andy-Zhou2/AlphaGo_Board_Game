@@ -4,6 +4,7 @@ from math import sqrt
 from model import GoBangNet
 from gobang_board import get_symmetries
 import numpy as np
+import time
 
 c_puct = 1
 DEFAULT_SEARCH_COUNT = 800
@@ -78,6 +79,9 @@ class TreeSearch:
         valid_moves = s.get_valid_actions()
         self.Vs[board] = valid_moves
         p = p * valid_moves
+        if p.sum() == 0:
+            print('warning! p is 0! changed to uniform distribution')
+            p = valid_moves
         p /= p.sum()
         self.Ps[board] = p
         self.Ns[board] = 0
@@ -115,7 +119,7 @@ class TreeSearch:
     def progress(self, move):
         self.root = self.root.move(move)
         # board = self.root.get_str_representation()
-        self.add_noise(self.root, 0.3)
+        self.add_noise(self.root, 0.01)
         # self.Ps[board] = 0.1 * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
     def add_noise(self, s, noise_level=0.3):
@@ -134,8 +138,8 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
     while not tree.root.is_game_ended():
         t2 = time.time()
         tree.search_from_root(sim_per_step)
-        pi_distribution, move = tree.get_pi_and_get_move(tau=0 if move_count > 15 else 1)
-        new_data = get_symmetries((tree.root.black, tree.root.white, tree.root.turn), pi_distribution)
+        pi_distribution, move = tree.get_pi_and_get_move(tau=1 if move_count > 15 else 1)
+        new_data = get_symmetries(tree.root.get_network_input()[0], pi_distribution)
         data.append(new_data)
         if tree.Nsa[(tree.root.get_str_representation(), move)] == 0:
             print('note: selecting a move with 0 visit')
@@ -150,11 +154,12 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
 
     print(tree.root.get_reward())
     tree.root.print_board()
-    print(tree.root.current_player)
+    print('winner:', another_player(tree.root.next_player))
 
     r = tree.root.get_reward()
     r *= -1
     all_data = []
+    print('last move reward:', r)
     for i in range(len(data) - 1, -1, -1):
         for sym in range(8):
             data[i][sym].append(r)

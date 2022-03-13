@@ -119,7 +119,7 @@ class TreeSearch:
     def progress(self, move):
         self.root = self.root.move(move)
         # board = self.root.get_str_representation()
-        self.add_noise(self.root, 0.01)
+        self.add_noise(self.root, 0.3)
         # self.Ps[board] = 0.1 * np.random.dirichlet(np.ones(225)) + self.Ps[board]
 
     def add_noise(self, s, noise_level=0.3):
@@ -127,7 +127,7 @@ class TreeSearch:
         if board not in self.Ps:
             print('note! add noise to un-expanded node')
             self.expand(s)
-        self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + self.Ps[board]
+        self.Ps[board] = noise_level * np.random.dirichlet(np.ones(225)) + (1-noise_level) * self.Ps[board]
 
 
 def generate_single_game(net, print_every_step=False, sim_per_step=200):
@@ -138,7 +138,7 @@ def generate_single_game(net, print_every_step=False, sim_per_step=200):
     while not tree.root.is_game_ended():
         t2 = time.time()
         tree.search_from_root(sim_per_step)
-        pi_distribution, move = tree.get_pi_and_get_move(tau=1 if move_count > 15 else 1)
+        pi_distribution, move = tree.get_pi_and_get_move(tau=0 if move_count > 5 else 1)
         new_data = get_symmetries(tree.root.get_network_input()[0], pi_distribution)
         data.append(new_data)
         if tree.Nsa[(tree.root.get_str_representation(), move)] == 0:

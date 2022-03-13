@@ -6,11 +6,11 @@ import numpy as np
 
 
 net_path = './data/nets'
-net_filename = f"gen_{2000}.net"
+net_filename = f"gen_{13280}.net"
 
 search_num = 2000
 
-human_plays_black = 1
+human_plays_black = 0
 
 net = GoBangNet().cuda()
 net.load_param(os.path.join(net_path, net_filename))
@@ -55,7 +55,7 @@ while not game_now.is_game_ended():
         for i in reversed(ind[np.argsort(policy[ind])]):
             print(f'{index_to_coord(i)}: {policy[i]}')
         tree.search(game_now)
-        tree.add_noise(game_now, 0.1)
+        # tree.add_noise(game_now, 0.1)
         for search_count in range(search_num):
             tree.search(game_now)
         _, move = tree.get_pi_and_get_move(0, game_now)
